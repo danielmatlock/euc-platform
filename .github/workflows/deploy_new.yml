@@ -5,15 +5,10 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
-  # Optional: Enable manual triggers
   workflow_dispatch:
 
 env:
-  AWS_REGION: eu-west-2
-
-permissions:
-  id-token: write
-  contents: read
+  AWS_REGION: eu-west-2  # London region code
 
 jobs:
   deploy:
@@ -22,17 +17,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: List directory contents
-        run: |
-          pwd
-          ls -la
-          ls -la euc-platform/cloudformation || echo "Cloudformation directory not found"
-
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ACCESS_KEY }}
-          aws-region: ${{ secrets.ACCESS_KEY_SECRET }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: eu-west-2  # Explicitly set region here
+          
+      - name: Verify AWS Configuration
+        run: |
+          aws configure list
+          aws sts get-caller-identity
 
       - name: Deploy CloudFormation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
@@ -44,3 +38,4 @@ jobs:
             ParameterKey2=ParameterValue2
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
+          region: eu-west-2  # Add explicit region here as well
