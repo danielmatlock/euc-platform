@@ -33,5 +33,5 @@ jobs:
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: vpc-euwest2-stack
-          template: vpc-eu-west-2-shared
+          template: euc-platform/tree/mainvpc-eu-west-2-shared
           no-fail-on-empty-changeset: "1"
