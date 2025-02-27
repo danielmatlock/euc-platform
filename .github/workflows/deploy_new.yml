@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: eu-west-2 # Change this to your desired region
+  AWS_REGION: eu-west-2
 
 permissions:
   id-token: write
