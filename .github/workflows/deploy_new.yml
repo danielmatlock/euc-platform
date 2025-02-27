@@ -1,0 +1,40 @@
+name: Deploy CloudFormation Stack
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  # Optional: Enable manual triggers
+  workflow_dispatch:
+
+env:
+  AWS_REGION: eu-west-2 # Change this to your desired region
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.ACCESS_KEY }}
+          aws-region: ${{ secrets.ACCESS_KEY_SECRET }}
+
+      - name: Deploy CloudFormation stack
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: vpc-backoffice-stack
+          template: cloudformation/vpc-eu-west-2-shared
+          parameter-overrides: |
+            ParameterKey1=ParameterValue1
+            ParameterKey2=ParameterValue2
+          capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
+          no-fail-on-empty-changeset: "1"
