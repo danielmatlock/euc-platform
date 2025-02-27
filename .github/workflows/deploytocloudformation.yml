@@ -35,4 +35,3 @@ jobs:
           name: vpc-euwest2-stack
           template: vpc-eu-west-2-shared
           no-fail-on-empty-changeset: "1"
-          parameter-overrides: "EC2InstanceType=t2.micro"
