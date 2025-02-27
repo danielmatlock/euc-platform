@@ -25,14 +25,14 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          role-to-assume: ${{ secrets.ACCESS_KEY }}
-          aws-region: ${{ secrets.ACCESS_KEY_SECRET }}
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
 
       - name: Deploy CloudFormation stack
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: vpc-backoffice-stack
-          template: cloudformation/vpc-eu-west-2-shared
+          template: euc-platform/cloudformation/vpc-eu-west-2-shared
           parameter-overrides: |
             ParameterKey1=ParameterValue1
             ParameterKey2=ParameterValue2
