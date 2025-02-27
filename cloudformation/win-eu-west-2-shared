@@ -1,0 +1,85 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create a Windows Server instance'
+
+Parameters:
+  WindowsServerVersion:
+    Type: String
+    Default: 2022
+    AllowedValues:
+      - 2019
+      - 2022
+      - 2025
+    Description: Choose the Windows Server version (2019, 2022, or 2025)
+
+  InstanceType:
+    Type: String
+    Default: t3.medium
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+    Description: Choose the instance type for the Windows Server
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: Select an existing VPC
+
+  Subnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: Select an existing subnet within the selected VPC
+
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Select an existing key pair
+
+  SecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: Select an existing security group
+
+  AWSRegion:
+    Type: String
+    Default: eu-west-1
+    AllowedValues:
+      - eu-west-1
+      - eu-west-2
+    Description: Choose the AWS region (eu-west-1 or eu-west-2)
+
+Resources:
+  WindowsServer:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId:
+        Fn::Join:
+          - ''
+          - - 'ami-07e25edfea5123438'
+            - Fn::FindInMap:
+                - AmiMapWindows2019
+                - !Ref 'AWS::Region'
+                - Code
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          GroupSet:
+            - !Ref SecurityGroup
+          SubnetId: !Ref Subnet
+      UserData:
+        Fn::Base64: !Sub |
+          <script>
+          cfn-init.exe -v --stack ${AWS::StackId} --resource WindowsServer --region ${AWS::Region}
+          </script>
+
+Mappings:
+  AmiMapWindows2019:
+    eu-west-1:
+      Code: '0b39c93b2f6a26e5fcb'
+    eu-west-2:
+      Code: '0b28eb98268b1b9eb2d'
+
+Outputs:
+  InstanceId:
+    Description: The Instance ID
+    Value: !Ref WindowsServer

@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create Windows EC2 instances with different versions and instance types
+
+Parameters:
+  WindowsVersion:
+    Type: String
+    Default: '2025'
+    AllowedValues:
+      - '2019'
+      - '2022'
+      - '2025'
+
+  InstanceType:
+    Type: String
+    Default: t3.medium
+    AllowedValues:
+      - t3.micro
+      - t3.small
+      - t3.medium
+      - t3.large
+      - t3.xlarge
+
+  VPC:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC ID
+
+  Subnet:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet ID
+
+  KeyPair:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Key pair name
+
+  AwsRegion:
+    Type: String
+    Default: eu-west-2
+    AllowedValues:
+      - eu-west-1
+      - eu-west-2
+
+  DomainJoinUsername:
+    Type: String
+    Description: Username for domain join
+
+  DomainJoinPassword:
+    Type: String
+    NoEcho: true
+    Description: Password for domain join
+
+  InstanceName:
+    Type: String
+    Default: MyWindowsInstance
+    Description: Name for the EC2 instance
+
+Mappings:
+  WindowsAMIMap:
+    eu-west-1:
+      '2019': ami-09c5bdfbb0284812b
+      '2022': ami-0d825a124481985ae
+      '2025': ami-01e2699733f1d85d1  
+    eu-west-2:
+      '2019': ami-0b738b7295e3be0a4
+      '2022': ami-05bfeaa616a095c81  
+      '2025': ami-07e25edfea5123438  
+
+Conditions:
+  IsWindows2019: !Equals [!Ref WindowsVersion, '2019']
+  IsWindows2022: !Equals [!Ref WindowsVersion, '2022']
+  IsWindows2025: !Equals [!Ref WindowsVersion, '2025']
+
+Resources:
+  WindowsInstance:
+    Type: AWS::EC2::Instance
+    Condition: !Or [!Or [IsWindows2019, IsWindows2022], IsWindows2025]
+    Properties:
+      ImageId: !FindInMap [WindowsAMIMap, !Ref AwsRegion, !Ref WindowsVersion]
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPair
+      NetworkInterfaces:
+        - AssociatePublicIpAddress: 'true'
+          DeviceIndex: '0'
+          GroupSet:
+            - !Ref InstanceSecurityGroup
+          SubnetId: !Ref Subnet
+      UserData:
+        Fn::Base64: !Sub |
+          <script>
+          # User data script goes here
+          
+          # Add domain join script
+          $username = "${DomainJoinUsername}"
+          $password = "${DomainJoinPassword}" | ConvertTo-SecureString -AsPlainText -Force
+          $credential = New-Object System.Management.Automation.PSCredential($username, $password)
+          Add-Computer -DomainName "your-domain.com" -Credential $credential
+          Restart-Computer -Force
+          </script>
+      Tags:
+        - Key: Name
+          Value: !Ref InstanceName
+          
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow RDP and HTTP
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 86.184.101.232/32
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      VpcId: !Ref VPC
+  
+  WindowsElasticIP:
+    Type: AWS::EC2::EIP
+    Condition: !Or [!Or [IsWindows2019, IsWindows2022], IsWindows2025]
+    Properties:
+      InstanceId: !Ref WindowsInstance
+
+Outputs:
+  WindowsInstanceId:
+    Description: Windows Instance ID
+    Value: !Ref WindowsInstance
+
+  WindowsElasticIP:
+    Description: Windows Elastic IP
+    Value: !Ref WindowsElasticIP

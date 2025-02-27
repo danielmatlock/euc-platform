@@ -1,0 +1,330 @@
+# [{"type":"text","text":"create cloudformation template with 2 vpcs one called workspaces with a cidr 10.51.0.0/16 and 2 /24 public and private subnets and one called appstream with a cidr 10.52.0.0/16 and 2 /24 public and 
+#private subnets.  Private subnets have no direct access to the intenrt only through NAt Gateway.  the public subnets have access direct via the gateway"}]  Here's an example CloudFormation template that creates two VPCs, 
+#one called "workspaces" with a CIDR range of 10.51.0.0/16 and two public and private subnets, and another called "appstream" with a CIDR range of 10.52.0.0/16 and two public and private subnets. The private subnets have no 
+#direct access to the internet and can only access it through a NAT Gateway, while the public subnets have direct internet access via an Internet Gateway.
+
+#This template creates the following resources:
+
+#- Two VPCs: `WorkspacesVPC` and `AppStreamVPC`
+#- Four public subnets (two for each VPC)
+#- Four private subnets (two for each VPC)
+#- One Internet Gateway attached to both VPCs
+#- One NAT Gateway for Workspaces private subnets (`WorkspacesNATGateway`)
+#- One NAT Gateway for AppStream private subnets (`AppStreamNATGateway`)
+#- Four route tables (one for each subnet type and VPC)
+#- Route table associations for each subnet
+#- Routes for public subnets to the Internet Gateway
+#- Routes for private subnets to their respective NAT Gateways
+
+#The template also exports the VPC IDs as outputs, which can be imported and used in other CloudFormation templates or resources.
+
+#Note:
+#- The `WorkspacesPublicSubnet1` and `WorkspacesPublicSubnet2` are created in `eu-west-2a` and `eu-west-2b` Availability Zones, respectively.
+#- The `WorkspacesPrivateSubnet1` and `WorkspacesPrivateSubnet2` are created in `eu-west-2a` and `eu-west-2b` Availability Zones, respectively.
+#- The `AppStreamPublicSubnet1` and `AppStreamPublicSubnet2` are created in `eu-west-2b` and `eu-west-2c` Availability Zones, respectively.
+#- The `AppStreamPrivateSubnet1` and `AppStreamPrivateSubnet2` are created in `eu-west-2b` and `eu-west-2c` Availability Zones, respectively.
+#- The private subnets in the `WorkspacesVPC` use the `WorkspacesNATGateway` for internet access.
+#- The private subnets in the `AppStreamVPC` use the `AppStreamNATGateway` for internet access.
+
+```yaml
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Create two VPCs with public and private subnets
+
+Parameters:
+  AvailabilityZonesWorkspaces:
+    Description: Availability Zones to create subnets for Workspaces
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Default:
+      - eu-west-2a
+      - eu-west-2b
+
+  AvailabilityZonesAppStream:
+    Description: Availability Zones to create subnets for AppStream
+    Type: List<AWS::EC2::AvailabilityZone::Name>
+    Default:
+      - eu-west-2b
+      - eu-west-2c
+
+Resources:
+  # VPC for Workspaces
+  WorkspacesVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.51.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-vpc
+
+  # Public subnets for Workspaces
+  WorkspacesPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      AvailabilityZone: !Select [0, !Ref AvailabilityZonesWorkspaces]
+      CidrBlock: 10.51.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-public-subnet1
+
+  WorkspacesPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      AvailabilityZone: !Select [1, !Ref AvailabilityZonesWorkspaces]
+      CidrBlock: 10.51.101.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-public-subnet2
+
+  # Private subnets for Workspaces
+  WorkspacesPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      AvailabilityZone: !Select [0, !Ref AvailabilityZonesWorkspaces]
+      CidrBlock: 10.51.2.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-private-subnet1
+
+  WorkspacesPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      AvailabilityZone: !Select [1, !Ref AvailabilityZonesWorkspaces]
+      CidrBlock: 10.51.102.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-private-subnet2
+
+  # VPC for AppStream
+  AppStreamVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.52.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      InstanceTenancy: default
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-vpc
+
+  # Public subnets for AppStream
+  AppStreamPublicSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      AvailabilityZone: !Select [0, !Ref AvailabilityZonesAppStream]
+      CidrBlock: 10.52.1.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-public-subnet1
+
+  AppStreamPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      AvailabilityZone: !Select [1, !Ref AvailabilityZonesAppStream]
+      CidrBlock: 10.52.101.0/24
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-public-subnet2
+
+  # Private subnets for AppStream
+  AppStreamPrivateSubnet1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      AvailabilityZone: !Select [0, !Ref AvailabilityZonesAppStream]
+      CidrBlock: 10.52.2.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-private-subnet1
+
+  AppStreamPrivateSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      AvailabilityZone: !Select [1, !Ref AvailabilityZonesAppStream]
+      CidrBlock: 10.52.102.0/24
+      MapPublicIpOnLaunch: false
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-private-subnet2
+
+  # Internet Gateway for public subnets
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+  # Attach Internet Gateway to VPCs
+  WorkspacesVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  AppStreamVPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      InternetGatewayId: !Ref InternetGateway
+
+  # NAT Gateway for Workspaces private subnets
+  WorkspacesNATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt WorkspacesNATGatewayEIP.AllocationId
+      SubnetId: !Ref WorkspacesPublicSubnet1
+
+  WorkspacesNATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  # NAT Gateway for AppStream private subnets
+  AppStreamNATGateway:
+    Type: AWS::EC2::NatGateway
+    Properties:
+      AllocationId: !GetAtt AppStreamNATGatewayEIP.AllocationId
+      SubnetId: !Ref AppStreamPublicSubnet1
+
+  AppStreamNATGatewayEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+
+  # Route tables for public and private subnets
+  WorkspacesPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-public-rt
+
+  WorkspacesPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref WorkspacesVPC
+      Tags:
+        - Key: Name
+          Value: eu-west-2-workspaces-private-rt
+
+  AppStreamPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-public-rt
+
+  AppStreamPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AppStreamVPC
+      Tags:
+        - Key: Name
+          Value: eu-west-2-appstream-private-rt
+
+  # Route table associations
+  WorkspacesPublicRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkspacesPublicSubnet1
+      RouteTableId: !Ref WorkspacesPublicRouteTable
+
+  WorkspacesPublicRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkspacesPublicSubnet2
+      RouteTableId: !Ref WorkspacesPublicRouteTable
+
+  WorkspacesPrivateRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkspacesPrivateSubnet1
+      RouteTableId: !Ref WorkspacesPrivateRouteTable
+
+  WorkspacesPrivateRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref WorkspacesPrivateSubnet2
+      RouteTableId: !Ref WorkspacesPrivateRouteTable
+
+  AppStreamPublicRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppStreamPublicSubnet1
+      RouteTableId: !Ref AppStreamPublicRouteTable
+
+  AppStreamPublicRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppStreamPublicSubnet2
+      RouteTableId: !Ref AppStreamPublicRouteTable
+
+  AppStreamPrivateRouteTableAssociation1:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppStreamPrivateSubnet1
+      RouteTableId: !Ref AppStreamPrivateRouteTable
+
+  AppStreamPrivateRouteTableAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AppStreamPrivateSubnet2
+      RouteTableId: !Ref AppStreamPrivateRouteTable
+
+  # Route to Internet Gateway for public subnets
+  WorkspacesPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref WorkspacesPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  AppStreamPublicRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppStreamPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  # Route to NAT Gateway for private subnets
+  WorkspacesPrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref WorkspacesPrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref WorkspacesNATGateway
+
+  AppStreamPrivateRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppStreamPrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref AppStreamNATGateway
+
+Outputs:
+  WorkspacesVPC:
+    Description: VPC ID for Workspaces
+    Value: !Ref WorkspacesVPC
+    Export:
+      Name: eu-west-2-workspaces-vpc
+
+  AppStreamVPC:
+    Description: VPC ID for AppStream
+    Value: !Ref AppStreamVPC
+    Export:
+      Name: eu-west-2-appstream-vpc
+```
