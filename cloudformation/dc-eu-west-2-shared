@@ -57,6 +57,9 @@ Resources:
           FromPort: 3389
           ToPort: 3389
           CidrIp: 10.50.0.0/16
+      Tags:
+        - Key: Name
+          Value: secg-dc-access    
 
   EC2Role:
     Type: 'AWS::IAM::Role'
