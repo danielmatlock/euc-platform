@@ -1,4 +1,4 @@
-name: IAM AWS Chronicle
+name: Deploy Security Role
 
 on:
   push:
