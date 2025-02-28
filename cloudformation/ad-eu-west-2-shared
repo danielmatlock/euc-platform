@@ -216,7 +216,7 @@ Parameters:
     AllowedPattern: '^[a-zA-Z0-9\-]*$'
   CaAmi:
     AllowedPattern: '^[\w\/-]+$'
-    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
+    Default: /aws/service/ami-windows-latest/Windows_Server-2025-English-Full-Base
     Description: Enterprise Root CA SSM Parameter Value to grab the latest AMI ID
     Type: String
   CaDataDriveSizeGiB:
@@ -417,7 +417,7 @@ Parameters:
     Description: ID of the VPC (e.g., vpc-0343606e)
     Type: AWS::EC2::VPC::Id
   WINFULLBASE:
-    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
+    Default: /aws/service/ami-windows-latest/Windows_Server-2025-English-Full-Base
     Description: System Manager parameter value for latest Windows Server AMI
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
 Rules:
