@@ -5,7 +5,7 @@ Resources:
   AWSChronicleRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: awschronicle
+      RoleName: awschronicle-old
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
