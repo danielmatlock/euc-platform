@@ -58,6 +58,39 @@ Resources:
           ToPort: 3389
           CidrIp: 10.50.0.0/16
 
+  EC2Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: 'awschronicle'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: 'ec2.amazonaws.com'
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'  # Basic SSM access
+      Policies:
+        - PolicyName: EC2SecurityGroupAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ec2:CreateSecurityGroup'
+                  - 'ec2:DescribeSecurityGroups'
+                  - 'ec2:AuthorizeSecurityGroupIngress'
+                Resource: '*'
+
+  EC2InstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      InstanceProfileName: 'awschronicle'
+      Path: '/'
+      Roles:
+        - !Ref EC2Role
+
   DC1Instance:
     Type: AWS::EC2::Instance
     Properties:
@@ -67,7 +100,7 @@ Resources:
       SubnetId: subnet-0304c4884214b12e9
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
-      IamInstanceProfile: 'awschronicle'
+      IamInstanceProfile: !Ref EC2InstanceProfile
       PrivateIpAddress: 10.50.2.10
       Tags:
         - Key: Name
@@ -82,7 +115,7 @@ Resources:
       SubnetId: subnet-0678a8c8aa5ce788a
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
-      IamInstanceProfile: 'awschronicle'
+      IamInstanceProfile: !Ref EC2InstanceProfile
       PrivateIpAddress: 10.50.102.10
       Tags:
         - Key: Name
