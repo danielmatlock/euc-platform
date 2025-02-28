@@ -67,7 +67,7 @@ Resources:
       SubnetId: subnet-0304c4884214b12e9
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
-      IamInstanceProfile: awschronicle
+      IamInstanceProfile: 'awschronicle'
       PrivateIpAddress: 10.50.2.10
       Tags:
         - Key: Name
@@ -82,7 +82,7 @@ Resources:
       SubnetId: subnet-0678a8c8aa5ce788a
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
-      IamInstanceProfile: awschronicle
+      IamInstanceProfile: 'awschronicle'
       PrivateIpAddress: 10.50.102.10
       Tags:
         - Key: Name
