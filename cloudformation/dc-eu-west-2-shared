@@ -71,17 +71,22 @@ Resources:
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore'  # Basic SSM access
-      Policies:
-        - PolicyName: EC2SecurityGroupAccess
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'ec2:CreateSecurityGroup'
-                  - 'ec2:DescribeSecurityGroups'
-                  - 'ec2:AuthorizeSecurityGroupIngress'
-                Resource: '*'
+        - arn:aws:iam::aws:policy/AmazonSSMPatchAssociation
+        - arn:aws:iam::aws:policy/service-role/ROSAKMSProviderPolicy
+        - !Ref PatchPolicyBaselineOverridesPolicy
+
+   PatchPolicyBaselineOverridesPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: aws-quicksetup-patchpolicy-baselineoverrides-s3
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+            Resource:
+              - arn:aws:s3:::aws-quicksetup-patchpolicy/*
 
   EC2InstanceProfile:
     Type: 'AWS::IAM::InstanceProfile'
