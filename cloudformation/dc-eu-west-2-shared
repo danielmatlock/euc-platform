@@ -1,0 +1,102 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Create two Windows Server 2022 instances for Active Directory'
+
+Resources:
+  ADSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ad-access
+      GroupDescription: Security group for Active Directory servers
+      VpcId: vpc-0f6a1842cd2ebaf14
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: udp
+          FromPort: 53
+          ToPort: 53
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 88
+          ToPort: 88
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: udp
+          FromPort: 88
+          ToPort: 88
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 389
+          ToPort: 389
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: udp
+          FromPort: 389
+          ToPort: 389
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 445
+          ToPort: 445
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 464
+          ToPort: 464
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: udp
+          FromPort: 464
+          ToPort: 464
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 636
+          ToPort: 636
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 3268
+          ToPort: 3269
+          CidrIp: 10.50.0.0/16
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 10.50.0.0/16
+
+  DC1Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0eb11ab33f229b26c  # Windows Server 2022 AMI for eu-west-2
+      InstanceType: t3.medium
+      KeyName: shared
+      SubnetId: subnet-0304c4884214b12e9
+      SecurityGroupIds: 
+        - !Ref ADSecurityGroup
+      IamInstanceProfile: awschronicle
+      PrivateIpAddress: 10.50.2.10
+      Tags:
+        - Key: Name
+          Value: dc1
+
+  DC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-0eb11ab33f229b26c  # Windows Server 2022 AMI for eu-west-2
+      InstanceType: t3.medium
+      KeyName: shared
+      SubnetId: subnet-0678a8c8aa5ce788a
+      SecurityGroupIds: 
+        - !Ref ADSecurityGroup
+      IamInstanceProfile: awschronicle
+      PrivateIpAddress: 10.50.102.10
+      Tags:
+        - Key: Name
+          Value: dc2
+
+Outputs:
+  DC1InstanceId:
+    Description: Instance ID of DC1
+    Value: !Ref DC1Instance
+
+  DC2InstanceId:
+    Description: Instance ID of DC2
+    Value: !Ref DC2Instance
+
+  SecurityGroupId:
+    Description: Security Group ID for AD Access
+    Value: !Ref ADSecurityGroup
