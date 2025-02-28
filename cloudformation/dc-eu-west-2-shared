@@ -75,7 +75,7 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/ROSAKMSProviderPolicy
         - !Ref PatchPolicyBaselineOverridesPolicy
 
-   PatchPolicyBaselineOverridesPolicy:
+  PatchPolicyBaselineOverridesPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       ManagedPolicyName: aws-quicksetup-patchpolicy-baselineoverrides-s3
