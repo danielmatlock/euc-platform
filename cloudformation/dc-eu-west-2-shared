@@ -61,7 +61,7 @@ Resources:
   DC1Instance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-0eb11ab33f229b26c  # Windows Server 2022 AMI for eu-west-2
+      ImageId: ami-03dad44b0cd6f43d1  # Windows Server 2025 AMI for eu-west-2
       InstanceType: t3.medium
       KeyName: shared
       SubnetId: subnet-0304c4884214b12e9
@@ -76,7 +76,7 @@ Resources:
   DC2Instance:
     Type: AWS::EC2::Instance
     Properties:
-      ImageId: ami-0eb11ab33f229b26c  # Windows Server 2022 AMI for eu-west-2
+      ImageId: ami-03dad44b0cd6f43d1  # Windows Server 2025 AMI for eu-west-2
       InstanceType: t3.medium
       KeyName: shared
       SubnetId: subnet-0678a8c8aa5ce788a
