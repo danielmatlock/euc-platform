@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Create a VPC with 2 Private and 2 Public Subnets'
+Description: 'Create a VPC with 2 Private and 2 Public Subnets for Backoffice use'
 
 Resources:
   # VPC
