@@ -25,6 +25,8 @@
           VpcId: !Ref shared
           AvailabilityZone: eu-west-2a
           CidrBlock: 10.50.1.0/24
+          EnableDnsHostnames: true
+          EnableDnsSupport: true
           MapPublicIpOnLaunch: true
           Tags:
             - Key: Name
@@ -36,6 +38,8 @@
           VpcId: !Ref shared
           AvailabilityZone: eu-west-2b
           CidrBlock: 10.50.101.0/24
+          EnableDnsHostnames: true
+          EnableDnsSupport: true
           MapPublicIpOnLaunch: true
           Tags:
             - Key: Name
