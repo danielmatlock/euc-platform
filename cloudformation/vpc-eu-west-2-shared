@@ -27,7 +27,7 @@
           VpcId: !Ref shared
           AvailabilityZone: eu-west-2a
           CidrBlock: 10.50.1.0/24
-          EnableDnsHostnames: true
+          MapPublicIpOnLaunch: true
           Tags:
             - Key: Name
               Value: pubnet-eu-west-2a-shared-1
