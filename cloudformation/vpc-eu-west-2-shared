@@ -14,7 +14,9 @@
         Type: AWS::EC2::VPC
         Properties:
           CidrBlock: 10.50.0.0/16
-          EnableResourceNameDnsARecord: true
+          EnableDnsHostnames: true
+        EnableDnsSupport: true
+        EnableResourceNameDnsA: true
           Tags:
             - Key: Name
               Value: vpc-eu-west-2-shared
