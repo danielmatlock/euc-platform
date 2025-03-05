@@ -7,6 +7,7 @@
 
 # Usage from command line:
 #   aws cloudformation --region eu-west-2 create-stack --stack-name vpc- --template-body file://vpc-setup.yaml
+AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Create a VPC with 2 Private and 2 Public Subnets'
     
     Resources:
