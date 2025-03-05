@@ -9,7 +9,7 @@
 #   aws cloudformation --region eu-west-2 create-stack --stack-name vpc- --template-body file://vpc-setup.yaml
 Description: 'Create a VPC with 2 Private and 2 Public Subnets'
     
-Resources:
+    Resources:
       ## VPC
       shared: 
         Type: AWS::EC2::VPC
@@ -21,7 +21,7 @@ Resources:
             - Key: Name
               Value: vpc-eu-west-2-shared
 
-      ## SUBNETS     
+    ## SUBNETS     
       PublicSubnet1:
         Type: AWS::EC2::Subnet
         Properties:
