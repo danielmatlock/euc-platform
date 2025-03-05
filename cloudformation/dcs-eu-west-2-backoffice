@@ -7,7 +7,7 @@ Resources:
     Properties:
       GroupName: ad-access
       GroupDescription: Security group for Active Directory servers
-      VpcId: vpc-0f6a1842cd2ebaf14
+      VpcId: vpc-0388fb5e582118408
       SecurityGroupIngress:
         - IpProtocol: tcp
           FromPort: 53
