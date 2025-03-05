@@ -1,0 +1,55 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Windows Bastion Host with GP3 volume in eu-west-3a using t3.medium'
+
+Resources:
+  BastionSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for Windows Bastion Host
+      VpcId: vpc-0f6a1842cd2ebaf14
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3389
+          ToPort: 3389
+          CidrIp: 86.180.139.177/24
+          Description: Allow RDP access
+
+  WindowsBastionHost:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: ami-03dad44b0cd6f43d1
+      InstanceType: t3.medium
+      KeyName: shared
+      SubnetId: subnet-01f1d19d7afb4a33e
+      PrivateIpAddress: 10.50.1.10
+      SecurityGroupIds: 
+        - !Ref BastionSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/sda1
+          Ebs:
+            VolumeSize: 30
+            VolumeType: gp3
+            Encrypted: true
+      AvailabilityZone: eu-west-2a
+      Tags:
+        - Key: Name
+          Value: Windows-Bastion
+
+  BastionEIP:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      InstanceId: !Ref WindowsBastionHost
+
+Outputs:
+  BastionPublicIP:
+    Description: Public IP address of the bastion host
+    Value: !Ref BastionEIP
+
+  BastionInstanceID:
+    Description: Instance ID of the bastion host
+    Value: !Ref WindowsBastionHost
+
+  SecurityGroupID:
+    Description: Security Group ID for the bastion host
+    Value: !Ref BastionSecurityGroup
