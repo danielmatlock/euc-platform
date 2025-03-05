@@ -14,8 +14,6 @@
         Type: AWS::EC2::VPC
         Properties:
           CidrBlock: 10.50.0.0/16
-          EnableDnsHostnames: true
-          EnableDnsSupport: true
           EnableResourceNameDnsARecord: true
           Tags:
             - Key: Name
