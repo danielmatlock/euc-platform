@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Create two Windows Server 2022 instances for Active Directory'
+Description: 'Create two Windows Server 2025 Instances for Active Directory'
 
 Resources:
   ADSecurityGroup:
@@ -105,7 +105,7 @@ Resources:
       ImageId: ami-03dad44b0cd6f43d1  # Windows Server 2025 AMI for eu-west-2
       InstanceType: t3.medium
       KeyName: shared
-      SubnetId: subnet-0304c4884214b12e9
+      SubnetId: subnet-0263c0f3243c62907
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
       IamInstanceProfile: !Ref EC2InstanceProfile
@@ -120,7 +120,7 @@ Resources:
       ImageId: ami-03dad44b0cd6f43d1  # Windows Server 2025 AMI for eu-west-2
       InstanceType: t3.medium
       KeyName: shared
-      SubnetId: subnet-0678a8c8aa5ce788a
+      SubnetId: subnet-0e678f61df561fcae
       SecurityGroupIds: 
         - !Ref ADSecurityGroup
       IamInstanceProfile: !Ref EC2InstanceProfile
