@@ -30,7 +30,7 @@ Resources:
             VolumeSize: 30
             VolumeType: gp3
             Encrypted: true
-      AvailabilityZone: eu-west-2a
+      AvailabilityZone: eu-west-2b
       Tags:
         - Key: Name
           Value: Windows-Bastion
