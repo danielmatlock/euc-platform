@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'Template to create VPC in Ireland (eu-west-1)'
+Description: 'Create a VPC with 2 Private and 2 Public Subnets for Backoffice use in Ireland'
 
 Resources:
   # VPC (10.150.0.0/16) in eu-west-1
