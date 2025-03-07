@@ -5,6 +5,9 @@ Resources:
   TransitGatewayPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
+      ManagedPolicyName: github-actions
+      Users: 
+        - 'github-action'
       PolicyDocument:
         Version: '2012-10-17'
         Statement:
@@ -115,14 +118,10 @@ Resources:
               - 'iam:TagPolicy'
             Resource: '*'
 
- # Attach policy directly to the github-action user
-  UserPolicyAttachment:
-    Type: AWS::IAM::UserPolicyAttachment
-    Properties:
-      PolicyArn: !Ref TransitGatewayPolicy
-      UserName: github-action
-
-Outputs:
-  RoleArn:
-    Description: ARN of the created IAM Role
-    Value: !GetAtt GithubActionRole.Arn
+ Outputs:
+  PolicyArn:
+    Description: ARN of the created IAM Policy
+    Value: 'arn:aws:iam::864981718291:policy/github-actions'
+  UserArn:
+    Description: ARN of the github-action user
+    Value: 'arn:aws:iam::864981718291:user/github-action'
