@@ -1,11 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'Template for VPC and Transit Gateway in eu-west-2'
 
-Parameters:
-  EuWest1TransitGatewayId:
-    Type: String
-    Description: Transit Gateway ID from eu-west-1
-
 Resources:
   # VPC in eu-west-2
   VPCEuWest2:
@@ -42,17 +37,6 @@ Resources:
       Tags:
         - Key: Name
           Value: tgw-attach-eu-west-2
-
-  # Transit Gateway Peering Attachment
-  TransitGatewayPeeringAttachment:
-    Type: AWS::EC2::TransitGatewayPeeringAttachment
-    Properties:
-      TransitGatewayId: !Ref TransitGatewayEuWest2
-      PeerTransitGatewayId: !Ref EuWest1TransitGatewayId
-      PeerRegion: eu-west-1
-      Tags:
-        - Key: Name
-          Value: tgw-peering-eu-west-2-to-eu-west-1
 
   # Subnets
   PublicSubnetEuWest2A:
@@ -105,14 +89,6 @@ Resources:
       Tags:
         - Key: Name
           Value: rt-private-eu-west-2
-
-  # Route to eu-west-1 VPC
-  PrivateRouteToEuWest1:
-    Type: AWS::EC2::Route
-    Properties:
-      RouteTableId: !Ref PrivateRouteTable
-      DestinationCidrBlock: 10.150.0.0/16  # CIDR of eu-west-1 VPC
-      TransitGatewayId: !Ref TransitGatewayEuWest2
 
 Outputs:
   TransitGatewayId:
