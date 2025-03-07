@@ -24,10 +24,17 @@ Resources:
       Tags:
         - Key: Name
           Value: tgw-eu-west-2
+    CreationPolicy:
+      ResourceSignal:
+        Timeout: PT15M
 
   # Transit Gateway VPC Attachment
   TransitGatewayAttachmentEuWest2:
     Type: AWS::EC2::TransitGatewayAttachment
+    DependsOn: 
+      - TransitGatewayEuWest2
+      - PrivateSubnetEuWest2A
+      - PrivateSubnetEuWest2B
     Properties:
       TransitGatewayId: !Ref TransitGatewayEuWest2
       VpcId: !Ref VPCEuWest2
@@ -90,7 +97,28 @@ Resources:
         - Key: Name
           Value: rt-private-eu-west-2
 
+  # Route Table Associations
+  PrivateSubnetRouteTableAssociationA:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetEuWest2A
+      RouteTableId: !Ref PrivateRouteTable
+
+  PrivateSubnetRouteTableAssociationB:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetEuWest2B
+      RouteTableId: !Ref PrivateRouteTable
+
 Outputs:
   TransitGatewayId:
     Description: Transit Gateway ID in eu-west-2
     Value: !Ref TransitGatewayEuWest2
+  
+  VPCId:
+    Description: VPC ID
+    Value: !Ref VPCEuWest2
+
+  PrivateSubnetIds:
+    Description: Private Subnet IDs
+    Value: !Join [",", [!Ref PrivateSubnetEuWest2A, !Ref PrivateSubnetEuWest2B]]
