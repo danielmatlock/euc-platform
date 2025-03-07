@@ -34,7 +34,7 @@ jobs:
       - name: Deploy CloudFormation Backoffice eu-west-1 VPC
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
-          name: vpc-backoffice-london
+          name: vpc-backoffice-ireland
           template: ./cloudformation/vpc-eu-west-1-backoffice-tg
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
