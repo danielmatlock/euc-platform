@@ -1,4 +1,4 @@
-name: Deploy VPC Backoffice eu-west-2
+name: deploy vpc backoffice eu-west-2
 
 on:
   push:
