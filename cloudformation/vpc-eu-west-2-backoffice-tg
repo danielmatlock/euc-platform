@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template for VPC and Transit Gateway in eu-west-2'
+
+Parameters:
+  EuWest1TransitGatewayId:
+    Type: String
+    Description: Transit Gateway ID from eu-west-1
+
+Resources:
+  # VPC in eu-west-2
+  VPCEuWest2:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.50.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: vpc-eu-west-2-backoffice
+
+  # Transit Gateway
+  TransitGatewayEuWest2:
+    Type: AWS::EC2::TransitGateway
+    Properties:
+      AmazonSideAsn: 64513
+      AutoAcceptSharedAttachments: enable
+      DefaultRouteTableAssociation: enable
+      DefaultRouteTablePropagation: enable
+      Tags:
+        - Key: Name
+          Value: tgw-eu-west-2
+
+  # Transit Gateway VPC Attachment
+  TransitGatewayAttachmentEuWest2:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGatewayEuWest2
+      VpcId: !Ref VPCEuWest2
+      SubnetIds: 
+        - !Ref PrivateSubnetEuWest2A
+        - !Ref PrivateSubnetEuWest2B
+      Tags:
+        - Key: Name
+          Value: tgw-attach-eu-west-2
+
+  # Transit Gateway Peering Attachment
+  TransitGatewayPeeringAttachment:
+    Type: AWS::EC2::TransitGatewayPeeringAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGatewayEuWest2
+      PeerTransitGatewayId: !Ref EuWest1TransitGatewayId
+      PeerRegion: eu-west-1
+      Tags:
+        - Key: Name
+          Value: tgw-peering-eu-west-2-to-eu-west-1
+
+  # Subnets
+  PublicSubnetEuWest2A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest2
+      CidrBlock: 10.50.1.0/24
+      AvailabilityZone: eu-west-2a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-2a
+
+  PublicSubnetEuWest2B:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest2
+      CidrBlock: 10.50.101.0/24
+      AvailabilityZone: eu-west-2b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-2b
+
+  PrivateSubnetEuWest2A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest2
+      CidrBlock: 10.50.2.0/24
+      AvailabilityZone: eu-west-2a
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-2a
+
+  PrivateSubnetEuWest2B:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest2
+      CidrBlock: 10.50.102.0/24
+      AvailabilityZone: eu-west-2b
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-2b
+
+  # Route Tables
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCEuWest2
+      Tags:
+        - Key: Name
+          Value: rt-private-eu-west-2
+
+  # Route to eu-west-1 VPC
+  PrivateRouteToEuWest1:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 10.150.0.0/16  # CIDR of eu-west-1 VPC
+      TransitGatewayId: !Ref TransitGatewayEuWest2
+
+Outputs:
+  TransitGatewayId:
+    Description: Transit Gateway ID in eu-west-2
+    Value: !Ref TransitGatewayEuWest2

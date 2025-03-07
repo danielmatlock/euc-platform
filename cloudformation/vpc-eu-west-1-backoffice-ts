@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template for VPC and Transit Gateway in eu-west-1'
+
+Resources:
+  # VPC in eu-west-1
+  VPCEuWest1:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.150.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: vpc-eu-west-1-backoffice
+
+  # Transit Gateway
+  TransitGatewayEuWest1:
+    Type: AWS::EC2::TransitGateway
+    Properties:
+      AmazonSideAsn: 64512
+      AutoAcceptSharedAttachments: enable
+      DefaultRouteTableAssociation: enable
+      DefaultRouteTablePropagation: enable
+      Tags:
+        - Key: Name
+          Value: tgw-eu-west-1
+
+  # Transit Gateway VPC Attachment
+  TransitGatewayAttachmentEuWest1:
+    Type: AWS::EC2::TransitGatewayAttachment
+    Properties:
+      TransitGatewayId: !Ref TransitGatewayEuWest1
+      VpcId: !Ref VPCEuWest1
+      SubnetIds: 
+        - !Ref PrivateSubnetEuWest1A
+        - !Ref PrivateSubnetEuWest1B
+      Tags:
+        - Key: Name
+          Value: tgw-attach-eu-west-1
+
+  # Subnets
+  PublicSubnetEuWest1A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      CidrBlock: 10.150.1.0/24
+      AvailabilityZone: eu-west-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-1a
+
+  PublicSubnetEuWest1B:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      CidrBlock: 10.150.101.0/24
+      AvailabilityZone: eu-west-1b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-1b
+
+  PrivateSubnetEuWest1A:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      CidrBlock: 10.150.2.0/24
+      AvailabilityZone: eu-west-1a
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-1a
+
+  PrivateSubnetEuWest1B:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      CidrBlock: 10.150.102.0/24
+      AvailabilityZone: eu-west-1b
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-1b
+
+  # Internet Gateway and Attachment
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: igw-eu-west-1
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      InternetGatewayId: !Ref InternetGateway
+
+  # Route Tables
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      Tags:
+        - Key: Name
+          Value: rt-public-eu-west-1
+
+  PrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCEuWest1
+      Tags:
+        - Key: Name
+          Value: rt-private-eu-west-1
+
+  # Routes
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PrivateRouteToEuWest2:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 10.50.0.0/16  # CIDR of eu-west-2 VPC
+      TransitGatewayId: !Ref TransitGatewayEuWest1
+
+Outputs:
+  TransitGatewayId:
+    Description: Transit Gateway ID in eu-west-1
+    Value: !Ref TransitGatewayEuWest1
