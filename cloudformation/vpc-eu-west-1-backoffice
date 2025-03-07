@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Template to create VPC in Ireland (eu-west-1)'
+
+Resources:
+  # VPC (10.150.0.0/16) in eu-west-1
+  VPCEuWest1Backoffice:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.150.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: vpc-eu-west-1-backoffice
+
+  # Public Subnets
+  PublicSubnetEuWest1ABackoffice1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      CidrBlock: 10.150.1.0/24
+      AvailabilityZone: eu-west-1a
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-1a-backoffice-1
+
+  PublicSubnetEuWest1BBackoffice1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      CidrBlock: 10.150.101.0/24
+      AvailabilityZone: eu-west-1b
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: pubnet-eu-west-1b-backoffice-1
+
+  # Private Subnets
+  PrivateSubnetEuWest1ABackoffice1:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      CidrBlock: 10.150.2.0/24
+      AvailabilityZone: eu-west-1a
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-1a-backoffice-1
+
+  PrivateSubnetEuWest1BBackoffice2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      CidrBlock: 10.150.102.0/24
+      AvailabilityZone: eu-west-1b
+      Tags:
+        - Key: Name
+          Value: prinet-eu-west-1b-backoffice-2
+
+  # Internet Gateway
+  InternetGatewayEuWest1Backoffice:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: igw-eu-west-1-backoffice
+
+  AttachGatewayEuWest1:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      InternetGatewayId: !Ref InternetGatewayEuWest1Backoffice
+
+  # Route Tables
+  PublicRouteTableEuWest1Backoffice:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      Tags:
+        - Key: Name
+          Value: rt-public-eu-west-1-backoffice
+
+  PublicRouteEuWest1:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGatewayEuWest1
+    Properties:
+      RouteTableId: !Ref PublicRouteTableEuWest1Backoffice
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGatewayEuWest1Backoffice
+
+  # Route Table Associations
+  PublicSubnetEuWest1ARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetEuWest1ABackoffice1
+      RouteTableId: !Ref PublicRouteTableEuWest1Backoffice
+
+  PublicSubnetEuWest1BRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnetEuWest1BBackoffice1
+      RouteTableId: !Ref PublicRouteTableEuWest1Backoffice
+
+  # Private Route Table
+  PrivateRouteTableEuWest1Backoffice:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPCEuWest1Backoffice
+      Tags:
+        - Key: Name
+          Value: rt-private-eu-west-1-backoffice
+
+  PrivateSubnetEuWest1ARouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetEuWest1ABackoffice1
+      RouteTableId: !Ref PrivateRouteTableEuWest1Backoffice
+
+  PrivateSubnetEuWest1BRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PrivateSubnetEuWest1BBackoffice2
+      RouteTableId: !Ref PrivateRouteTableEuWest1Backoffice
+
+Outputs:
+  VPCIdEuWest1:
+    Description: VPC ID for eu-west-1
+    Value: !Ref VPCEuWest1Backoffice
