@@ -1,4 +1,4 @@
-name: Deploy 2 Regions VPC Backoffice Stack
+name: Deploy VPC Backoffice eu-west-1
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  AWS_REGION: eu-west-2
+  AWS_REGION: eu-west-1
 
 jobs:
   deploy:
@@ -31,11 +31,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
           aws-region: eu-west-2
 
-      - name: Deploy CloudFormation Backoffice 2 Region VPC
+      - name: Deploy CloudFormation Backoffice eu-west-1 VPC
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: vpc-backoffice-london
-          template: ./cloudformation/vpc-2region-backoffice
+          template: ./cloudformation/vpc-eu-west-1-backoffice
           capabilities: CAPABILITY_IAM,CAPABILITY_NAMED_IAM
           no-fail-on-empty-changeset: "1"
           region: eu-west-2
