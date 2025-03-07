@@ -1,4 +1,4 @@
-name: Deploy VPC Backoffice Stack
+name: Deploy VPC Backoffice eu-west-2
 
 on:
   push:
@@ -31,7 +31,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.ACCESS_KEY_SECRET }}
           aws-region: eu-west-2
 
-      - name: Deploy CloudFormation Backoffice VPC
+      - name: Deploy CloudFormation Backoffice eu-west-2
         uses: aws-actions/aws-cloudformation-github-deploy@v1
         with:
           name: vpc-backoffice-london
