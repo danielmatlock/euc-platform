@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: 'IAM Policy for Transit Gateway management'
+Description: 'IAM Policy for Gibhub Management'
 
 Resources:
   TransitGatewayPolicy:
