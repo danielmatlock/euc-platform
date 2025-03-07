@@ -115,18 +115,12 @@ Resources:
               - 'iam:TagPolicy'
             Resource: '*'
 
-  GithubActionRole:
-    Type: AWS::IAM::Role
+ # Attach policy directly to the github-action user
+  UserPolicyAttachment:
+    Type: AWS::IAM::UserPolicyAttachment
     Properties:
-      AssumeRolePolicyDocument:
-        Version: '2012-10-17'
-        Statement:
-          - Effect: Allow
-            Principal:
-              AWS: !Sub 'arn:aws:iam::${AWS::AccountId}:user/github-action'
-            Action: 'sts:AssumeRole'
-      ManagedPolicyArns:
-        - !Ref TransitGatewayPolicy
+      PolicyArn: !Ref TransitGatewayPolicy
+      UserName: github-action
 
 Outputs:
   RoleArn:
