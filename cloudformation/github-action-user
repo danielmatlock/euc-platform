@@ -118,7 +118,7 @@ Resources:
               - 'iam:TagPolicy'
             Resource: '*'
 
- Outputs:
+Outputs:
   PolicyArn:
     Description: ARN of the created IAM Policy
     Value: 'arn:aws:iam::864981718291:policy/github-actions'
